@@ -9,7 +9,7 @@
 ## POST /projects.json — 建立專案
 
 ```bash
-bin/redmine-api POST /projects.json '{
+python bin/redmine-api POST /projects.json '{
   "project": {
     "name": "Phase 2",
     "identifier": "phase-2",
@@ -41,7 +41,7 @@ bin/redmine-api POST /projects.json '{
 ## GET /projects.json — 查詢專案列表
 
 ```bash
-bin/redmine-api GET '/projects.json?include=trackers,issue_categories,enabled_modules,time_entry_activities'
+python bin/redmine-api GET '/projects.json?include=trackers,issue_categories,enabled_modules,time_entry_activities'
 ```
 
 ### include 參數說明
@@ -56,7 +56,7 @@ bin/redmine-api GET '/projects.json?include=trackers,issue_categories,enabled_mo
 ## GET /projects/{id}.json — 查詢單一專案
 
 ```bash
-bin/redmine-api GET '/projects/project-x.json?include=trackers,issue_categories,enabled_modules,time_entry_activities'
+python bin/redmine-api GET '/projects/project-x.json?include=trackers,issue_categories,enabled_modules,time_entry_activities'
 ```
 
 ### 注意事項
@@ -69,7 +69,7 @@ bin/redmine-api GET '/projects/project-x.json?include=trackers,issue_categories,
 ## PUT /projects/{id}.json — 更新專案
 
 ```bash
-bin/redmine-api PUT /projects/phase-2.json '{
+python bin/redmine-api PUT /projects/phase-2.json '{
   "project": {
     "name": "Phase 2 (Updated)",
     "description": "更新後的描述",
@@ -88,7 +88,7 @@ bin/redmine-api PUT /projects/phase-2.json '{
 ## DELETE /projects/{id}.json — 刪除專案
 
 ```bash
-bin/redmine-api DELETE /projects/phase-2.json
+python bin/redmine-api DELETE /projects/phase-2.json
 ```
 
 ### 警告：極高風險操作
@@ -105,7 +105,7 @@ bin/redmine-api DELETE /projects/phase-2.json
 ## POST /projects/{id}/memberships.json — 新增成員
 
 ```bash
-bin/redmine-api POST /projects/project-x/memberships.json '{
+python bin/redmine-api POST /projects/project-x/memberships.json '{
   "membership": {
     "user_id": 5,
     "role_ids": [3]
@@ -123,7 +123,7 @@ bin/redmine-api POST /projects/project-x/memberships.json '{
 ## GET /projects/{id}/memberships.json — 查詢成員
 
 ```bash
-bin/redmine-api GET /projects/project-x/memberships.json
+python bin/redmine-api GET /projects/project-x/memberships.json
 ```
 
 回應包含每位成員的 `user`（id、name）與 `roles`（id、name）資訊。
@@ -146,12 +146,12 @@ bin/redmine-api GET /projects/project-x/memberships.json
 ### 範例
 
 ```bash
-bin/redmine-api GET /enumerations/time_entry_activities.json
-bin/redmine-api GET /trackers.json
-bin/redmine-api GET /issue_statuses.json
-bin/redmine-api GET /enumerations/issue_priorities.json
-bin/redmine-api GET /roles.json
-bin/redmine-api GET /users/current.json
+python bin/redmine-api GET /enumerations/time_entry_activities.json
+python bin/redmine-api GET /trackers.json
+python bin/redmine-api GET /issue_statuses.json
+python bin/redmine-api GET /enumerations/issue_priorities.json
+python bin/redmine-api GET /roles.json
+python bin/redmine-api GET /users/current.json
 ```
 
 ---

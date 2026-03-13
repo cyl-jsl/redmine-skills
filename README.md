@@ -1,6 +1,6 @@
-# Redmine API Skill for Claude Code
+# Redmine API Skill
 
-讓 Claude Code 透過自然語言操作 Redmine REST API——工時登打、議題管理、專案建置、狀態查詢等。
+讓 AI agent 透過自然語言操作 Redmine REST API——工時登打、議題管理、專案建置、狀態查詢等。
 
 ## 功能
 
@@ -43,7 +43,7 @@ API Key 取得方式：Redmine → 我的帳戶 → API 存取金鑰
 
 ### 4. 驗證
 
-跟 Claude 說「查詢我的 Redmine 帳號資訊」，應回傳你的使用者資料（API Key 自動遮蔽）。
+跟 AI 說「查詢我的 Redmine 帳號資訊」，應回傳你的使用者資料（API Key 自動遮蔽）。
 
 ## 架構
 
@@ -63,9 +63,10 @@ references/
 
 ## 安全設計
 
-- **零接觸憑證**：AI 不讀取設定檔、不組認證 header，一切透過 `bin/redmine-api` CLI wrapper
+- **零接觸憑證**：AI 不得以任何方式讀取 `~/.redmine.json`，不組認證 header，一切透過 `bin/redmine-api` CLI wrapper
 - **回應淨化**：自動遮蔽 `api_key`、`password` 等敏感欄位
 - **強制 HTTPS**：拒絕 HTTP 明文連線
+- **批次寫入驗證**：批次操作後須查詢確認結果正確
 
 ## 擴充
 

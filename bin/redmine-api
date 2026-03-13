@@ -141,16 +141,16 @@ def upload_file(url, api_key, file_path):
 
 def print_usage():
     print("""用法：
-  redmine-api <METHOD> <ENDPOINT> [JSON_BODY]
-  redmine-api upload <FILE_PATH>
+  python bin/redmine-api <METHOD> <ENDPOINT> [JSON_BODY]
+  python bin/redmine-api upload <FILE_PATH>
 
 範例：
-  redmine-api GET /users/current.json
-  redmine-api GET '/issues.json?status_id=open&assigned_to_id=me'
-  redmine-api POST /time_entries.json '{"time_entry":{"issue_id":123,"hours":2}}'
-  redmine-api PUT /issues/100.json '{"issue":{"status_id":3,"notes":"done"}}'
-  redmine-api DELETE /time_entries/456.json
-  redmine-api upload report.pdf""")
+  python bin/redmine-api GET /users/current.json
+  python bin/redmine-api GET '/issues.json?status_id=open&assigned_to_id=me'
+  python bin/redmine-api POST /time_entries.json '{"time_entry":{"issue_id":123,"hours":2}}'
+  python bin/redmine-api PUT /issues/100.json '{"issue":{"status_id":3,"notes":"done"}}'
+  python bin/redmine-api DELETE /time_entries/456.json
+  python bin/redmine-api upload report.pdf""")
     sys.exit(1)
 
 

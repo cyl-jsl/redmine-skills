@@ -31,7 +31,7 @@
 ### 分頁查詢範例
 
 ```bash
-bin/redmine-api GET '/issues.json?offset=0&limit=100&project_id=myproject'
+python bin/redmine-api GET '/issues.json?offset=0&limit=100&project_id=myproject'
 ```
 
 ---
@@ -70,7 +70,7 @@ import subprocess
 
 def redmine_api(method, endpoint, data=None):
     """透過 CLI wrapper 呼叫 Redmine API"""
-    cmd = ["bin/redmine-api", method, endpoint]
+    cmd = ["python", "bin/redmine-api", method, endpoint]
     if data:
         cmd.append(json.dumps(data))
     result = subprocess.run(cmd, capture_output=True, text=True)

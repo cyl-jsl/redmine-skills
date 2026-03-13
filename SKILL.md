@@ -17,6 +17,13 @@ description: >
 | 意圖路由 | 根據使用者意圖查下方路由表，按需載入對應 reference，不要一次全讀。複合意圖時依序載入所有相關 reference |
 | 連線韌性 | CLI 工具會自動檢查設定檔；若不存在，引導使用者參考 `setup.md` 建立 |
 
+## 安全禁令
+
+- **禁止** 使用 Read 工具讀取 `~/.redmine.json`
+- **禁止** 使用 `cat`、`head`、`less` 等任何方式讀取 `~/.redmine.json`
+- **禁止** 在 curl 或任何命令中手動帶入 API Key
+- **禁止** 在對話中顯示、複述或推測 API Key 內容
+
 ## CLI 工具
 
 所有 API 操作透過 `bin/redmine-api` 執行，此工具：
@@ -26,11 +33,15 @@ description: >
 - 驗證 HTTPS 連線
 - 錯誤時輸出結構化的中文訊息
 
+**工作目錄**：執行命令前，須先 `cd` 至本 Skill 所在目錄（即包含 `bin/redmine-api` 的目錄）。
+
 ```
 用法：
-  bin/redmine-api <METHOD> <ENDPOINT> [JSON_BODY]
-  bin/redmine-api upload <FILE_PATH>
+  python bin/redmine-api <METHOD> <ENDPOINT> [JSON_BODY]
+  python bin/redmine-api upload <FILE_PATH>
 ```
+
+**注意**：必須使用 `python bin/redmine-api` 呼叫，不可省略 `python` 直接執行 `bin/redmine-api`。
 
 ## 基本錯誤碼
 
@@ -49,18 +60,14 @@ description: >
 | 工時登打、查詢工時、工時統計 | `references/api-time-entries.md` |
 | 建立/查詢/更新/指派議題、上傳附件 | `references/api-issues.md` |
 | 專案、子專案、成員、活動類型、枚舉查詢 | `references/api-projects.md` |
-| 分頁處理、批次操作、進階錯誤處理 | `references/api-common.md` |
+| 批次操作（多筆寫入、自動分頁取全部資料） | `references/api-common.md` |
+| 分頁處理、進階錯誤處理 | `references/api-common.md` |
 
 ## 互動流程
 
 1. 判斷使用者意圖，從路由表找到對應 reference
 2. 用 Read 工具載入該 reference
-3. 依 reference 中的 API 說明，透過 `bin/redmine-api` 組合請求
+3. 依 reference 中的 API 說明，透過 `python bin/redmine-api` 組合請求
 4. **讀取操作**：直接用 Bash 執行 CLI 工具，回報結果
 5. **寫入操作**：先顯示操作摘要（什麼操作、哪個資源、關鍵欄位），等使用者確認後才執行
-
-## 安全禁令
-
-- **禁止** 使用 Read 工具讀取 `~/.redmine.json`
-- **禁止** 在 curl 或任何命令中手動帶入 API Key
-- **禁止** 在對話中顯示、複述或推測 API Key 內容
+6. **批次寫入後**：必須用 GET 查詢驗證結果，確認筆數與內容正確後才回報完成

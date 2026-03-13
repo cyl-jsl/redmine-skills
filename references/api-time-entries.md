@@ -9,7 +9,7 @@
 ## POST /time_entries.json — 登打工時
 
 ```bash
-bin/redmine-api POST /time_entries.json '{
+python bin/redmine-api POST /time_entries.json '{
   "time_entry": {
     "issue_id": 123,
     "hours": 2.0,
@@ -34,7 +34,7 @@ bin/redmine-api POST /time_entries.json '{
 ## GET /time_entries.json — 查詢工時
 
 ```bash
-bin/redmine-api GET '/time_entries.json?user_id=me&from=2026-03-10&to=2026-03-14&limit=100'
+python bin/redmine-api GET '/time_entries.json?user_id=me&from=2026-03-10&to=2026-03-14&limit=100'
 ```
 
 ### 篩選參數
@@ -58,7 +58,7 @@ bin/redmine-api GET '/time_entries.json?user_id=me&from=2026-03-10&to=2026-03-14
 ## PUT /time_entries/{id}.json — 更新工時
 
 ```bash
-bin/redmine-api PUT /time_entries/456.json '{"time_entry": {"hours": 3.0, "comments": "修正時數"}}'
+python bin/redmine-api PUT /time_entries/456.json '{"time_entry": {"hours": 3.0, "comments": "修正時數"}}'
 ```
 
 ### 說明
@@ -71,7 +71,7 @@ bin/redmine-api PUT /time_entries/456.json '{"time_entry": {"hours": 3.0, "comme
 ## DELETE /time_entries/{id}.json — 刪除工時
 
 ```bash
-bin/redmine-api DELETE /time_entries/456.json
+python bin/redmine-api DELETE /time_entries/456.json
 ```
 
 ### 說明

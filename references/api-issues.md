@@ -9,7 +9,7 @@
 ## POST /issues.json — 建立議題
 
 ```bash
-bin/redmine-api POST /issues.json '{
+python bin/redmine-api POST /issues.json '{
   "issue": {
     "project_id": "project-x",
     "subject": "登入頁面壞了",
@@ -47,7 +47,7 @@ HTTP 201，回應 body 包含完整議題物件：
 ## GET /issues.json — 查詢議題列表
 
 ```bash
-bin/redmine-api GET '/issues.json?project_id=project-x&status_id=open&assigned_to_id=me&sort=updated_on:desc&limit=25'
+python bin/redmine-api GET '/issues.json?project_id=project-x&status_id=open&assigned_to_id=me&sort=updated_on:desc&limit=25'
 ```
 
 ### 過濾參數
@@ -67,7 +67,7 @@ bin/redmine-api GET '/issues.json?project_id=project-x&status_id=open&assigned_t
 加入 `include` 參數可一次取回關聯資料：
 
 ```bash
-bin/redmine-api GET '/issues.json?project_id=project-x&include=journals,relations,attachments'
+python bin/redmine-api GET '/issues.json?project_id=project-x&include=journals,relations,attachments'
 ```
 
 ### 回應格式
@@ -86,7 +86,7 @@ bin/redmine-api GET '/issues.json?project_id=project-x&include=journals,relation
 ## GET /issues/{id}.json — 查詢單一議題
 
 ```bash
-bin/redmine-api GET '/issues/123.json?include=children,attachments,relations,changesets,journals,watchers'
+python bin/redmine-api GET '/issues/123.json?include=children,attachments,relations,changesets,journals,watchers'
 ```
 
 ### include 選項
@@ -105,7 +105,7 @@ bin/redmine-api GET '/issues/123.json?include=children,attachments,relations,cha
 ## PUT /issues/{id}.json — 更新議題
 
 ```bash
-bin/redmine-api PUT /issues/100.json '{
+python bin/redmine-api PUT /issues/100.json '{
   "issue": {
     "status_id": 3,
     "notes": "已修復，請驗證"
@@ -125,7 +125,7 @@ bin/redmine-api PUT /issues/100.json '{
 ## DELETE /issues/{id}.json — 刪除議題
 
 ```bash
-bin/redmine-api DELETE /issues/200.json
+python bin/redmine-api DELETE /issues/200.json
 ```
 
 ### 注意事項
@@ -143,7 +143,7 @@ bin/redmine-api DELETE /issues/200.json
 ### Step 1：上傳檔案取得 token
 
 ```bash
-bin/redmine-api upload /path/to/report.pdf
+python bin/redmine-api upload /path/to/report.pdf
 ```
 
 回應：
@@ -155,7 +155,7 @@ bin/redmine-api upload /path/to/report.pdf
 ### Step 2：附加到議題
 
 ```bash
-bin/redmine-api PUT /issues/200.json '{
+python bin/redmine-api PUT /issues/200.json '{
   "issue": {
     "uploads": [
       {
