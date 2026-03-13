@@ -41,12 +41,6 @@ mklink /D %USERPROFILE%\.claude\skills\redmine \path\to\redmine-skills
 
 API Key 取得方式：Redmine → 我的帳戶 → API 存取金鑰
 
-設定檔案權限：
-
-```bash
-chmod 600 ~/.redmine.json
-```
-
 ### 4. 驗證
 
 跟 Claude 說「查詢我的 Redmine 帳號資訊」，應回傳你的使用者資料（API Key 自動遮蔽）。
@@ -71,7 +65,6 @@ references/
 
 - **零接觸憑證**：AI 不讀取設定檔、不組認證 header，一切透過 `bin/redmine-api` CLI wrapper
 - **回應淨化**：自動遮蔽 `api_key`、`password` 等敏感欄位
-- **權限檢查**：啟動時驗證 `~/.redmine.json` 檔案權限 ≤ 600
 - **強制 HTTPS**：拒絕 HTTP 明文連線
 
 ## 擴充

@@ -31,12 +31,6 @@ mklink /D %USERPROFILE%\.claude\skills\redmine \path\to\redmine-skills
 }
 ```
 
-**設定檔案權限（重要）：**
-
-```bash
-chmod 600 ~/.redmine.json
-```
-
 ### API Key 取得方式
 
 1. 登入 Redmine
@@ -56,4 +50,3 @@ chmod 600 ~/.redmine.json
 - `設定檔不存在`：檢查 `~/.redmine.json` 是否已建立
 - `API Key 無效`：檢查 api_key 是否正確
 - `URL 必須使用 HTTPS`：確認 url 以 `https://` 開頭
-- `設定檔權限過寬`：執行 `chmod 600 ~/.redmine.json`

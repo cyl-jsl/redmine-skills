@@ -7,7 +7,6 @@
 
 import json
 import os
-import stat
 import sys
 import urllib.error
 import urllib.request
@@ -25,14 +24,6 @@ def load_config():
             "hint": "請參考 setup.md 建立設定檔"
         }, ensure_ascii=False), file=sys.stderr)
         sys.exit(1)
-
-    # 檢查檔案權限（Unix only）
-    if hasattr(os, "chmod"):
-        mode = os.stat(CONFIG_PATH).st_mode
-        if mode & (stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH):
-            print(json.dumps({
-                "warning": f"設定檔權限過寬（{oct(mode)[-3:]}），建議執行：chmod 600 {CONFIG_PATH}"
-            }, ensure_ascii=False), file=sys.stderr)
 
     with open(CONFIG_PATH) as f:
         config = json.load(f)

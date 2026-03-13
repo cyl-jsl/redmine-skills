@@ -23,7 +23,7 @@ description: >
 
 - 內部讀取 `~/.redmine.json`，自動處理認證
 - 自動遮蔽回應中的敏感欄位（`api_key`、`password` 等）
-- 驗證設定檔權限（須 ≤ 600）與 HTTPS 連線
+- 驗證 HTTPS 連線
 - 錯誤時輸出結構化的中文訊息
 
 ```
