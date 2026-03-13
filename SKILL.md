@@ -12,10 +12,11 @@ description: >
 
 | 原則 | 說明 |
 |------|------|
-| 安全分級 | 讀取操作（GET）直接執行並回報結果；寫入操作（POST/PUT/DELETE）先顯示操作摘要，等使用者確認後才執行 |
+| 安全分級 | **直接執行**：GET；**摘要後直接執行**：POST/PUT 工時、PUT 議題（僅 notes/status）；**需使用者確認**：DELETE、POST/DELETE 專案 |
 | 零接觸憑證 | **禁止**使用 Read 工具讀取 `~/.redmine.json`。所有 API 呼叫一律透過 `bin/redmine-api` CLI 工具，認證由 wrapper 內部處理，API Key 不得出現在對話中 |
 | 意圖路由 | 根據使用者意圖查下方路由表，按需載入對應 reference，不要一次全讀。複合意圖時依序載入所有相關 reference |
 | 連線韌性 | CLI 工具會自動檢查設定檔；若不存在，引導使用者參考 `setup.md` 建立 |
+| 枚舉快取 | `activity_id`、`tracker_id`、`status_id`、`priority_id` 等枚舉資料在同一對話中只需查詢一次，後續直接引用 |
 
 ## 安全禁令
 
@@ -38,10 +39,14 @@ description: >
 ```
 用法：
   python bin/redmine-api <METHOD> <ENDPOINT> [JSON_BODY]
+  python bin/redmine-api <METHOD> <ENDPOINT> < body.json
+  echo '{"..."}' | python bin/redmine-api <METHOD> <ENDPOINT>
   python bin/redmine-api upload <FILE_PATH>
 ```
 
-**注意**：必須使用 `python bin/redmine-api` 呼叫，不可省略 `python` 直接執行 `bin/redmine-api`。
+**注意**：
+- 必須使用 `python bin/redmine-api` 呼叫，不可省略 `python` 直接執行 `bin/redmine-api`
+- POST/PUT 含中文的 JSON body 建議透過 stdin 傳入，避免 shell 編碼問題
 
 ## 基本錯誤碼
 
@@ -69,5 +74,6 @@ description: >
 2. 用 Read 工具載入該 reference
 3. 依 reference 中的 API 說明，透過 `python bin/redmine-api` 組合請求
 4. **讀取操作**：直接用 Bash 執行 CLI 工具，回報結果
-5. **寫入操作**：先顯示操作摘要（什麼操作、哪個資源、關鍵欄位），等使用者確認後才執行
-6. **批次寫入後**：必須用 GET 查詢驗證結果，確認筆數與內容正確後才回報完成
+5. **低風險寫入**（POST/PUT 工時、PUT 議題 notes/status）：顯示操作摘要後**直接執行**，不需等使用者確認
+6. **高風險寫入**（DELETE、POST/DELETE 專案、大幅變更）：顯示操作摘要，**等使用者明確確認**後才執行
+7. **批次寫入後**：必須用 GET 查詢驗證結果，確認筆數與內容正確後才回報完成

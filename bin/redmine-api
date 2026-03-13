@@ -142,6 +142,8 @@ def upload_file(url, api_key, file_path):
 def print_usage():
     print("""用法：
   python bin/redmine-api <METHOD> <ENDPOINT> [JSON_BODY]
+  python bin/redmine-api <METHOD> <ENDPOINT> < body.json
+  echo '{"..."}' | python bin/redmine-api <METHOD> <ENDPOINT>
   python bin/redmine-api upload <FILE_PATH>
 
 範例：
@@ -150,7 +152,9 @@ def print_usage():
   python bin/redmine-api POST /time_entries.json '{"time_entry":{"issue_id":123,"hours":2}}'
   python bin/redmine-api PUT /issues/100.json '{"issue":{"status_id":3,"notes":"done"}}'
   python bin/redmine-api DELETE /time_entries/456.json
-  python bin/redmine-api upload report.pdf""")
+  python bin/redmine-api upload report.pdf
+
+POST/PUT 的 JSON body 可透過參數或 stdin 傳入（stdin 可避免 shell 編碼問題）。""")
     sys.exit(1)
 
 
@@ -167,6 +171,8 @@ def main():
     elif command in ("GET", "POST", "PUT", "DELETE"):
         endpoint = sys.argv[2]
         data = sys.argv[3] if len(sys.argv) > 3 else None
+        if data is None and command in ("POST", "PUT") and not sys.stdin.isatty():
+            data = sys.stdin.read()
         api_request(url, api_key, command, endpoint, data)
     else:
         print_usage()

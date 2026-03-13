@@ -71,9 +71,9 @@ import subprocess
 def redmine_api(method, endpoint, data=None):
     """透過 CLI wrapper 呼叫 Redmine API"""
     cmd = ["python", "bin/redmine-api", method, endpoint]
-    if data:
-        cmd.append(json.dumps(data))
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    stdin_data = json.dumps(data, ensure_ascii=False) if data else None
+    result = subprocess.run(cmd, capture_output=True, text=True,
+                            input=stdin_data, encoding="utf-8")
     if result.returncode != 0:
         raise RuntimeError(result.stderr)
     return json.loads(result.stdout) if result.stdout.strip() else None
