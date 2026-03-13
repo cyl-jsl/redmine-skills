@@ -91,7 +91,22 @@ description: >
 | 安全分級 | 讀取操作直接執行；寫入操作先摘要確認再執行 |
 | 最小呼叫 | 優先用最簡單的方式完成；當複雜度升高時自然切換為更適合的方式 |
 | 設定檔驅動 | 連線資訊從 `~/.redmine.json` 讀取，skill 本體不含任何憑證 |
-| 意圖路由 | 根據使用者意圖查路由表，按需載入對應 reference，不要一次全讀 |
+| 意圖路由 | 根據使用者意圖查路由表，按需載入對應 reference，不要一次全讀。複合意圖時依序載入所有相關 reference |
+| 連線韌性 | 設定檔不存在時引導使用者建立（指向 setup.md）；API Key 無效時提示檢查設定檔 |
+
+### 載入策略
+
+每次執行 API 操作時，SKILL.md 中直接包含最精簡的共用知識（認證 header 格式、基本錯誤碼），不需額外載入 api-common.md。api-common.md 作為進階參考（分頁、批次模式、呼叫範本），在需要時才載入。
+
+### 互動範例
+
+```
+使用者：「幫我記今天在 issue #123 花了 2 小時做開發」
+→ 載入 api-time-entries.md
+→ 組 POST /time_entries.json 請求
+→ 顯示確認摘要（issue #123, 2h, 開發, 今天）
+→ 使用者確認 → 執行
+```
 
 ### 路由表
 
@@ -125,6 +140,7 @@ description: >
 - `POST /issues.json` — 建立議題（project_id、subject、tracker_id、priority_id、assigned_to_id）
 - `GET /issues.json` — 查詢議題（多種篩選條件、排序）
 - `PUT /issues/{id}.json` — 更新狀態、指派、新增留言（notes）
+- `DELETE /issues/{id}.json` — 刪除議題（高風險，需額外確認）
 - 附件上傳：`POST /uploads.json` → 取得 token → 附加到 issue
 - 自然語言情境範例
 
@@ -143,6 +159,15 @@ description: >
 2. 建立 symlink（macOS/Linux 與 Windows 指令）
 3. 建立 `~/.redmine.json` 並填入 URL 和 API Key
 4. 驗證步驟：請 AI「查詢我的 Redmine 帳號資訊」
+
+## 何時更新這份 Skill
+
+| 情境 | 更新什麼 |
+|------|----------|
+| 發現新的 API 端點需求 | 新增 reference + 路由表加一行 |
+| 發現 API 行為與文件不符 | 更新對應 reference |
+| 使用者反覆需要確認同類型寫入操作 | 考慮調整安全分級原則 |
+| 發現新的互動模式（如常用的複合操作） | 更新 SKILL.md 互動範例或新增 reference |
 
 ## 擴充方式
 
