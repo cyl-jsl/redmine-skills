@@ -108,6 +108,32 @@ total_hours = sum(e["hours"] for e in all_entries)
 print(f"共 {len(all_entries)} 筆，總工時 {total_hours} 小時")
 ```
 
+### 範例：批次登打多日工時
+
+```python
+entries = [
+    ("2025-10-02", 29701, "基本資料維護模組開發"),
+    ("2025-10-03", 29702, "表單簽核流程開發"),
+    ("2025-10-06", 29703, "計畫管理功能開發"),
+]
+
+for spent_on, issue_id, comment in entries:
+    redmine_api("POST", "/time_entries.json", {
+        "time_entry": {
+            "issue_id": issue_id,
+            "hours": 8,
+            "activity_id": 11,
+            "comments": comment,
+            "spent_on": spent_on,
+            "custom_fields": [
+                {"id": 1003, "value": "v2政府"},
+                {"id": 1007, "value": comment}
+            ]
+        }
+    })
+    print(f"✅ {spent_on} issue#{issue_id}")
+```
+
 ### 範例：批次更新議題
 
 ```python

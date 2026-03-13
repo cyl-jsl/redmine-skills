@@ -46,7 +46,7 @@ description: >
 
 **注意**：
 - 必須使用 `python bin/redmine-api` 呼叫，不可省略 `python` 直接執行 `bin/redmine-api`
-- POST/PUT 含中文的 JSON body 建議透過 stdin 傳入，避免 shell 編碼問題
+- CLI 內部已強制 UTF-8 編碼，中文 JSON 可直接透過參數或 stdin 傳入，不需額外處理編碼
 
 ## 基本錯誤碼
 

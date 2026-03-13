@@ -11,9 +11,10 @@
 登打工時的理想流程：最多 1 次 GET + 1 次 POST，不超過 2 次 API 呼叫。
 
 - **使用者提供 issue ID**：不需查專案，直接用 `issue_id` 登打
-- **使用者提供專案名稱但不知 ID**：用 `GET /projects.json` 查詢，以 `identifier` 欄位匹配（不要用 `name` 做多次模糊搜尋）
+- **使用者提供專案名稱但不知 ID**：用一次 `GET /time_entries.json?user_id=me&limit=5` 查近期工時，通常可從中找到該專案的 `project_id` 和 `issue_id`。如果近期沒有相關記錄，再用 `GET /projects.json?limit=100` 分頁搜尋（可能需多頁，專案總數可達上千筆）
 - **activity_id**：若使用者未指定活動類型，可省略（Redmine 會使用預設值）；若需查詢，用 `GET /enumerations/time_entry_activities.json` 一次取得全部
 - **不要反覆查詢專案或工時來探索欄位**：所有必要的欄位格式與 custom field ID 已記載在本文件中
+- **不要建立臨時 .py 腳本**：單筆操作直接用 CLI 命令；批次操作使用 `python -c` inline 或參照 `api-common.md` 的批次範本
 
 ---
 

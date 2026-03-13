@@ -1,3 +1,14 @@
 .DS_Store
 .claude/
 docs/superpowers/
+docs/test-session-records/
+
+# AI agent 產生的暫存檔
+tmp_*.json
+tmp_*.py
+*.tmp
+submit_*.py
+find_project.py
+check_project.py
+list_issues.py
+post_*.py
