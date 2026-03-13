@@ -2,24 +2,22 @@
 
 工時登打是最高頻率的操作，本文件涵蓋完整的 CRUD 流程。
 
+所有呼叫均透過 `bin/redmine-api` CLI 工具，認證由工具內部處理。
+
 ---
 
 ## POST /time_entries.json — 登打工時
 
 ```bash
-curl -s -X POST \
-  -H "X-Redmine-API-Key: ${API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "time_entry": {
-      "issue_id": 123,
-      "hours": 2.0,
-      "activity_id": 9,
-      "comments": "開發功能",
-      "spent_on": "2026-03-13"
-    }
-  }' \
-  "${URL}/time_entries.json"
+bin/redmine-api POST /time_entries.json '{
+  "time_entry": {
+    "issue_id": 123,
+    "hours": 2.0,
+    "activity_id": 9,
+    "comments": "開發功能",
+    "spent_on": "2026-03-13"
+  }
+}'
 ```
 
 ### 欄位說明
@@ -36,20 +34,19 @@ curl -s -X POST \
 ## GET /time_entries.json — 查詢工時
 
 ```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/time_entries.json?user_id=me&from=2026-03-10&to=2026-03-14&limit=100"
+bin/redmine-api GET '/time_entries.json?user_id=me&from=2026-03-10&to=2026-03-14&limit=100'
 ```
 
 ### 篩選參數
 
-| 參數         | 說明                          |
-|--------------|-------------------------------|
-| `user_id`    | 使用者 ID，`me` 代表自己      |
-| `project_id` | 依專案篩選                    |
-| `from`       | 起始日期，格式 `YYYY-MM-DD`   |
-| `to`         | 結束日期，格式 `YYYY-MM-DD`   |
-| `limit`      | 每頁筆數（最大 100）          |
-| `offset`     | 分頁偏移量                    |
+| 參數 | 說明 |
+|------|------|
+| `user_id` | 使用者 ID，`me` 代表自己 |
+| `project_id` | 依專案篩選 |
+| `from` | 起始日期，格式 `YYYY-MM-DD` |
+| `to` | 結束日期，格式 `YYYY-MM-DD` |
+| `limit` | 每頁筆數（最大 100） |
+| `offset` | 分頁偏移量 |
 
 ### 回應格式
 
@@ -61,31 +58,25 @@ curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
 ## PUT /time_entries/{id}.json — 更新工時
 
 ```bash
-curl -s -X PUT \
-  -H "X-Redmine-API-Key: ${API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{"time_entry": {"hours": 3.0, "comments": "修正時數"}}' \
-  "${URL}/time_entries/456.json"
+bin/redmine-api PUT /time_entries/456.json '{"time_entry": {"hours": 3.0, "comments": "修正時數"}}'
 ```
 
 ### 說明
 
 - 可更新任意欄位：`hours`、`activity_id`、`comments`、`spent_on`
-- 成功時回傳空白內容（HTTP 200）
+- 成功時回傳 `{"status": "ok", "http_code": 200}`
 
 ---
 
 ## DELETE /time_entries/{id}.json — 刪除工時
 
 ```bash
-curl -s -X DELETE \
-  -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/time_entries/456.json"
+bin/redmine-api DELETE /time_entries/456.json
 ```
 
 ### 說明
 
-- 成功時回傳空白內容（HTTP 200）
+- 成功時回傳 `{"status": "ok", "http_code": 200}`
 - **寫入操作**：需確認後執行
 
 ---

@@ -13,42 +13,34 @@ description: >
 | 原則 | 說明 |
 |------|------|
 | 安全分級 | 讀取操作（GET）直接執行並回報結果；寫入操作（POST/PUT/DELETE）先顯示操作摘要，等使用者確認後才執行 |
-| 最小呼叫 | 預設用 curl 完成；批次、鏈式或需要複雜解析時切換為 Python |
-| 設定檔驅動 | 連線資訊從 `~/.redmine.json` 讀取，skill 本體不含任何憑證 |
+| 零接觸憑證 | **禁止**使用 Read 工具讀取 `~/.redmine.json`。所有 API 呼叫一律透過 `bin/redmine-api` CLI 工具，認證由 wrapper 內部處理，API Key 不得出現在對話中 |
 | 意圖路由 | 根據使用者意圖查下方路由表，按需載入對應 reference，不要一次全讀。複合意圖時依序載入所有相關 reference |
-| 連線韌性 | 設定檔不存在時引導使用者建立（指向 setup.md）；API Key 無效時提示檢查設定檔 |
+| 連線韌性 | CLI 工具會自動檢查設定檔；若不存在，引導使用者參考 `setup.md` 建立 |
 
-## 連線設定
+## CLI 工具
 
-每次操作前，先用 Read 工具讀取 `~/.redmine.json` 取得連線資訊：
+所有 API 操作透過 `bin/redmine-api` 執行，此工具：
 
-```json
-{
-  "url": "https://redminesrv.ksi.com.tw",
-  "api_key": "your-api-key-here"
-}
-```
-
-若檔案不存在，引導使用者參考 `setup.md` 建立設定檔。
-
-## 認證 Header
-
-所有 API 請求須帶：
+- 內部讀取 `~/.redmine.json`，自動處理認證
+- 自動遮蔽回應中的敏感欄位（`api_key`、`password` 等）
+- 驗證設定檔權限（須 ≤ 600）與 HTTPS 連線
+- 錯誤時輸出結構化的中文訊息
 
 ```
-X-Redmine-API-Key: {api_key}
-Content-Type: application/json
+用法：
+  bin/redmine-api <METHOD> <ENDPOINT> [JSON_BODY]
+  bin/redmine-api upload <FILE_PATH>
 ```
 
 ## 基本錯誤碼
 
-| HTTP 狀態碼 | 意義 | 處理方式 |
+| HTTP 狀態碼 | 意義 | CLI 輸出 |
 |-------------|------|----------|
-| 200/201 | 成功 | 回報結果 |
-| 401 | API Key 無效 | 提示使用者檢查 `~/.redmine.json` 中的 api_key |
-| 403 | 權限不足 | 告知使用者該操作需要更高權限 |
-| 404 | 資源不存在 | 告知使用者指定的資源（議題/專案等）不存在 |
-| 422 | 欄位錯誤 | 顯示 Redmine 回傳的 errors 陣列內容 |
+| 200/201 | 成功 | 輸出 JSON 結果 |
+| 401 | API Key 無效 | 提示檢查 `~/.redmine.json` |
+| 403 | 權限不足 | 告知需要更高權限 |
+| 404 | 資源不存在 | 告知資源不存在 |
+| 422 | 欄位錯誤 | 顯示 errors 陣列 |
 
 ## 意圖路由表
 
@@ -61,9 +53,14 @@ Content-Type: application/json
 
 ## 互動流程
 
-1. 讀取 `~/.redmine.json` 取得 `url` 和 `api_key`
-2. 判斷使用者意圖，從路由表找到對應 reference
-3. 用 Read 工具載入該 reference
-4. 依 reference 中的 API 說明組合請求
-5. **讀取操作**：直接用 Bash 執行 curl，回報結果
-6. **寫入操作**：先顯示操作摘要（什麼操作、哪個資源、關鍵欄位），等使用者確認後才執行
+1. 判斷使用者意圖，從路由表找到對應 reference
+2. 用 Read 工具載入該 reference
+3. 依 reference 中的 API 說明，透過 `bin/redmine-api` 組合請求
+4. **讀取操作**：直接用 Bash 執行 CLI 工具，回報結果
+5. **寫入操作**：先顯示操作摘要（什麼操作、哪個資源、關鍵欄位），等使用者確認後才執行
+
+## 安全禁令
+
+- **禁止** 使用 Read 工具讀取 `~/.redmine.json`
+- **禁止** 在 curl 或任何命令中手動帶入 API Key
+- **禁止** 在對話中顯示、複述或推測 API Key 內容

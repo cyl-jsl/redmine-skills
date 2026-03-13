@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""Redmine API CLI — 安全封裝層
+
+所有認證資訊僅存在於 process 記憶體中，不會輸出至 stdout/stderr。
+回應中的敏感欄位會自動遮蔽。
+"""
+
+import json
+import os
+import stat
+import sys
+import urllib.error
+import urllib.request
+
+CONFIG_PATH = os.path.expanduser("~/.redmine.json")
+
+SENSITIVE_KEYS = {"api_key", "password", "token", "secret"}
+
+
+def load_config():
+    """讀取設定檔並執行安全檢查"""
+    if not os.path.isfile(CONFIG_PATH):
+        print(json.dumps({
+            "error": f"設定檔不存在：{CONFIG_PATH}",
+            "hint": "請參考 setup.md 建立設定檔"
+        }, ensure_ascii=False), file=sys.stderr)
+        sys.exit(1)
+
+    # 檢查檔案權限（Unix only）
+    if hasattr(os, "chmod"):
+        mode = os.stat(CONFIG_PATH).st_mode
+        if mode & (stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH):
+            print(json.dumps({
+                "warning": f"設定檔權限過寬（{oct(mode)[-3:]}），建議執行：chmod 600 {CONFIG_PATH}"
+            }, ensure_ascii=False), file=sys.stderr)
+
+    with open(CONFIG_PATH) as f:
+        config = json.load(f)
+
+    url = config.get("url", "").rstrip("/")
+    api_key = config.get("api_key", "")
+
+    if not url:
+        print(json.dumps({"error": "設定檔缺少 url"}, ensure_ascii=False), file=sys.stderr)
+        sys.exit(1)
+    if not api_key:
+        print(json.dumps({"error": "設定檔缺少 api_key"}, ensure_ascii=False), file=sys.stderr)
+        sys.exit(1)
+
+    # 強制 HTTPS
+    if not url.startswith("https://"):
+        print(json.dumps({
+            "error": f"安全性要求：URL 必須使用 HTTPS，目前為 {url[:20]}..."
+        }, ensure_ascii=False), file=sys.stderr)
+        sys.exit(1)
+
+    return url, api_key
+
+
+def sanitize(obj):
+    """遞迴遮蔽回應中的敏感欄位"""
+    if isinstance(obj, dict):
+        for key in obj:
+            if key in SENSITIVE_KEYS and isinstance(obj[key], str):
+                obj[key] = "[REDACTED]"
+            else:
+                sanitize(obj[key])
+    elif isinstance(obj, list):
+        for item in obj:
+            sanitize(item)
+
+
+def api_request(url, api_key, method, endpoint, data=None):
+    """發送 API 請求"""
+    full_url = url + endpoint
+    req = urllib.request.Request(full_url, method=method)
+    req.add_header("X-Redmine-API-Key", api_key)
+    req.add_header("Content-Type", "application/json")
+
+    if data:
+        req.data = data.encode("utf-8")
+
+    try:
+        with urllib.request.urlopen(req) as resp:
+            body = resp.read().decode("utf-8")
+            if body.strip():
+                result = json.loads(body)
+                sanitize(result)
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+            else:
+                print(json.dumps({"status": "ok", "http_code": resp.status}, ensure_ascii=False))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8")
+        error_detail = None
+        if body.strip():
+            try:
+                error_detail = json.loads(body)
+                sanitize(error_detail)
+            except json.JSONDecodeError:
+                error_detail = body[:500]
+
+        error_msg = {
+            "error": {
+                "http_code": e.code,
+                "message": {
+                    401: "API Key 無效，請檢查 ~/.redmine.json",
+                    403: "權限不足",
+                    404: "資源不存在",
+                    422: "欄位驗證錯誤",
+                }.get(e.code, e.reason),
+            }
+        }
+        if error_detail:
+            error_msg["error"]["details"] = error_detail
+
+        print(json.dumps(error_msg, ensure_ascii=False, indent=2), file=sys.stderr)
+        sys.exit(1)
+    except urllib.error.URLError as e:
+        print(json.dumps({
+            "error": f"無法連線至 Redmine：{e.reason}"
+        }, ensure_ascii=False), file=sys.stderr)
+        sys.exit(1)
+
+
+def upload_file(url, api_key, file_path):
+    """上傳檔案取得 token"""
+    if not os.path.isfile(file_path):
+        print(json.dumps({"error": f"檔案不存在：{file_path}"}, ensure_ascii=False), file=sys.stderr)
+        sys.exit(1)
+
+    with open(file_path, "rb") as f:
+        file_data = f.read()
+
+    full_url = url + "/uploads.json"
+    req = urllib.request.Request(full_url, method="POST", data=file_data)
+    req.add_header("X-Redmine-API-Key", api_key)
+    req.add_header("Content-Type", "application/octet-stream")
+
+    try:
+        with urllib.request.urlopen(req) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8")
+        print(json.dumps({
+            "error": {"http_code": e.code, "message": "檔案上傳失敗"}
+        }, ensure_ascii=False), file=sys.stderr)
+        sys.exit(1)
+
+
+def print_usage():
+    print("""用法：
+  redmine-api <METHOD> <ENDPOINT> [JSON_BODY]
+  redmine-api upload <FILE_PATH>
+
+範例：
+  redmine-api GET /users/current.json
+  redmine-api GET '/issues.json?status_id=open&assigned_to_id=me'
+  redmine-api POST /time_entries.json '{"time_entry":{"issue_id":123,"hours":2}}'
+  redmine-api PUT /issues/100.json '{"issue":{"status_id":3,"notes":"done"}}'
+  redmine-api DELETE /time_entries/456.json
+  redmine-api upload report.pdf""")
+    sys.exit(1)
+
+
+def main():
+    if len(sys.argv) < 3:
+        print_usage()
+
+    url, api_key = load_config()
+
+    command = sys.argv[1].upper()
+
+    if command == "UPLOAD":
+        upload_file(url, api_key, sys.argv[2])
+    elif command in ("GET", "POST", "PUT", "DELETE"):
+        endpoint = sys.argv[2]
+        data = sys.argv[3] if len(sys.argv) > 3 else None
+        api_request(url, api_key, command, endpoint, data)
+    else:
+        print_usage()
+
+
+if __name__ == "__main__":
+    main()

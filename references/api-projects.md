@@ -2,25 +2,23 @@
 
 本文件涵蓋專案的建立、查詢、更新、刪除、成員管理，以及各種枚舉資料的查詢。
 
+所有呼叫均透過 `bin/redmine-api` CLI 工具，認證由工具內部處理。
+
 ---
 
 ## POST /projects.json — 建立專案
 
 ```bash
-curl -s -X POST \
-  -H "X-Redmine-API-Key: ${API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "project": {
-      "name": "Phase 2",
-      "identifier": "phase-2",
-      "parent_id": 1,
-      "description": "第二階段開發",
-      "is_public": false,
-      "inherit_members": true
-    }
-  }' \
-  "${URL}/projects.json"
+bin/redmine-api POST /projects.json '{
+  "project": {
+    "name": "Phase 2",
+    "identifier": "phase-2",
+    "parent_id": 1,
+    "description": "第二階段開發",
+    "is_public": false,
+    "inherit_members": true
+  }
+}'
 ```
 
 ### 欄位說明
@@ -43,8 +41,7 @@ curl -s -X POST \
 ## GET /projects.json — 查詢專案列表
 
 ```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/projects.json?include=trackers,issue_categories,enabled_modules,time_entry_activities"
+bin/redmine-api GET '/projects.json?include=trackers,issue_categories,enabled_modules,time_entry_activities'
 ```
 
 ### include 參數說明
@@ -59,8 +56,7 @@ curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
 ## GET /projects/{id}.json — 查詢單一專案
 
 ```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/projects/project-x.json?include=trackers,issue_categories,enabled_modules,time_entry_activities"
+bin/redmine-api GET '/projects/project-x.json?include=trackers,issue_categories,enabled_modules,time_entry_activities'
 ```
 
 ### 注意事項
@@ -73,32 +69,26 @@ curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
 ## PUT /projects/{id}.json — 更新專案
 
 ```bash
-curl -s -X PUT \
-  -H "X-Redmine-API-Key: ${API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "project": {
-      "name": "Phase 2 (Updated)",
-      "description": "更新後的描述",
-      "is_public": true
-    }
-  }' \
-  "${URL}/projects/phase-2.json"
+bin/redmine-api PUT /projects/phase-2.json '{
+  "project": {
+    "name": "Phase 2 (Updated)",
+    "description": "更新後的描述",
+    "is_public": true
+  }
+}'
 ```
 
 ### 注意事項
 
 - `identifier` 建立後**不可修改**，不需傳入此欄位
-- 成功回應為 HTTP 204 No Content（無回應 body）
+- 成功回應 `{"status": "ok", "http_code": 200}`
 
 ---
 
 ## DELETE /projects/{id}.json — 刪除專案
 
 ```bash
-curl -s -X DELETE \
-  -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/projects/phase-2.json"
+bin/redmine-api DELETE /projects/phase-2.json
 ```
 
 ### 警告：極高風險操作
@@ -115,16 +105,12 @@ curl -s -X DELETE \
 ## POST /projects/{id}/memberships.json — 新增成員
 
 ```bash
-curl -s -X POST \
-  -H "X-Redmine-API-Key: ${API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "membership": {
-      "user_id": 5,
-      "role_ids": [3]
-    }
-  }' \
-  "${URL}/projects/project-x/memberships.json"
+bin/redmine-api POST /projects/project-x/memberships.json '{
+  "membership": {
+    "user_id": 5,
+    "role_ids": [3]
+  }
+}'
 ```
 
 ### 欄位說明
@@ -137,8 +123,7 @@ curl -s -X POST \
 ## GET /projects/{id}/memberships.json — 查詢成員
 
 ```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/projects/project-x/memberships.json"
+bin/redmine-api GET /projects/project-x/memberships.json
 ```
 
 回應包含每位成員的 `user`（id、name）與 `roles`（id、name）資訊。
@@ -158,46 +143,15 @@ curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
 | `GET /roles.json` | 角色列表（管理者、開發者等） | `roles` |
 | `GET /users/current.json` | 當前使用者資訊 | `user` |
 
-### GET /enumerations/time_entry_activities.json
+### 範例
 
 ```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/enumerations/time_entry_activities.json"
-```
-
-### GET /trackers.json
-
-```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/trackers.json"
-```
-
-### GET /issue_statuses.json
-
-```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/issue_statuses.json"
-```
-
-### GET /enumerations/issue_priorities.json
-
-```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/enumerations/issue_priorities.json"
-```
-
-### GET /roles.json
-
-```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/roles.json"
-```
-
-### GET /users/current.json
-
-```bash
-curl -s -H "X-Redmine-API-Key: ${API_KEY}" \
-  "${URL}/users/current.json"
+bin/redmine-api GET /enumerations/time_entry_activities.json
+bin/redmine-api GET /trackers.json
+bin/redmine-api GET /issue_statuses.json
+bin/redmine-api GET /enumerations/issue_priorities.json
+bin/redmine-api GET /roles.json
+bin/redmine-api GET /users/current.json
 ```
 
 ---
